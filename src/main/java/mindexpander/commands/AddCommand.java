@@ -99,7 +99,7 @@ public class AddCommand extends Command implements Multistep, Traceable {
         if (currentStep == Step.GET_QUESTION) {
             this.question = nextInput.trim();
             for (Question q : questionBank.getAllQuestions()) {
-                if (q.getQuestion().equals(question)) {
+                if (q.getQuestion().equalsIgnoreCase(question)) {
                     updateCommandMessage("Question already exists. Terminating add command.");
                     isComplete = true;
                     return this;
