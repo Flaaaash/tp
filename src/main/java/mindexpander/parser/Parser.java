@@ -63,17 +63,40 @@ public class Parser {
         case "list" -> handleList(userEntry, taskDetails, questionBank);
         case "find" -> handleFind(userEntry, taskDetails, questionBank);
         case "edit" -> handleEdit(userEntry, taskDetails, questionBank, lastShownQuestionBank, commandHistory);
-        case "delete" -> DeleteCommand.parseFromUserInput(taskDetails, questionBank,
-            lastShownQuestionBank, commandHistory);
+        case "delete" -> handleDelete(userEntry, taskDetails, questionBank, lastShownQuestionBank, commandHistory);
         case "undo" -> handleUndo(userEntry, taskDetails, commandHistory);
         case "redo" -> handleRedo(userEntry, taskDetails, commandHistory);
         case "show" -> handleShow(userEntry, taskDetails, questionBank, lastShownQuestionBank);
-        case "clear" -> ClearCommand.parseFromUserInput(taskDetails, questionBank, commandHistory);
+        case "clear" -> handleClear(userEntry, taskDetails, questionBank, commandHistory);
         default -> {
             ErrorLogger.logError(userEntry, Messages.UNKNOWN_COMMAND_MESSAGE);
             throw new IllegalCommandException(Messages.UNKNOWN_COMMAND_MESSAGE);
         }
         };
+    }
+
+    private Command handleDelete(String userEntry, String taskDetails, QuestionBank questionBank,
+                                 QuestionBank lastShownQuestionBank, CommandHistory commandHistory) {
+        if (taskDetails.isEmpty()) {
+            ErrorLogger.logError(userEntry, "Please provide a question index to delete.");
+            throw new IllegalCommandException("Please provide a question index to delete.");
+        }
+        try {
+            int index = Integer.parseInt(taskDetails.trim());
+            return new DeleteCommand(index, questionBank, lastShownQuestionBank, commandHistory);
+        } catch (NumberFormatException e) {
+            ErrorLogger.logError(userEntry, "Invalid number format. Please enter a valid index.");
+            throw new IllegalCommandException("Invalid number format. Please enter a valid index.");
+        }
+    }
+
+    private Command handleClear(String userEntry, String taskDetails, QuestionBank questionBank,
+                                CommandHistory commandHistory) {
+        if (!taskDetails.trim().isEmpty()) {
+            ErrorLogger.logError(userEntry, "The clear command does not take additional parameters.");
+            throw new IllegalCommandException("The clear command does not take additional parameters.");
+        }
+        return new ClearCommand(questionBank, commandHistory);
     }
 
     private Command handleExit(String userEntry, String taskDetails) {
@@ -141,7 +164,7 @@ public class Parser {
             CommandHistory commandHistory
     ) {
         try {
-            String[] commandArguments = taskDetails.split(" ", 2);
+            String[] commandArguments = taskDetails.trim().split(" ", 2);
 
             if (commandArguments.length < 2) {
                 ErrorLogger.logError(userEntry, Messages.UNKNOWN_COMMAND_MESSAGE);
@@ -151,16 +174,17 @@ public class Parser {
                         "\n" + "'o' for multiple choice options.");
             }
 
-            int indexToEdit = Integer.parseInt(commandArguments[0]);
-            String toEdit = commandArguments[1];
+            int indexToEdit = Integer.parseInt(commandArguments[0].trim());
+            String toEdit = commandArguments[1].trim();
 
             if (indexToEdit < 1 || indexToEdit > lastShownQuestionBank.getQuestionCount()) {
-                throw new IllegalCommandException("Invalid question index.");
+                ErrorLogger.logError(userEntry, "Invalid question index. Please enter a valid index.");
+                throw new IllegalCommandException("Invalid question index. Please enter a valid index.");
             }
             return new EditCommand(indexToEdit, toEdit, questionBank, lastShownQuestionBank, commandHistory);
         } catch (NumberFormatException e) {
-            ErrorLogger.logError(userEntry, Messages.UNKNOWN_COMMAND_MESSAGE);
-            throw new IllegalCommandException(Messages.UNKNOWN_COMMAND_MESSAGE);
+            ErrorLogger.logError(userEntry, "Invalid number. Please enter a valid number.");
+            throw new IllegalCommandException("Invalid number. Please enter a valid number.");
         }
     }
 
