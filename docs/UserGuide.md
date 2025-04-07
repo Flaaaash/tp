@@ -127,10 +127,10 @@ Example usage for `TF` questions:
 
   - FITB: Which continent is France located?
 
-  - MCQ: Which continent is France located? \
-    A. Europe\
-    B. Asia\
-    C. North America\
+  - MCQ: Which continent is France located?  
+    A. Europe  
+    B. Asia  
+    C. North America  
     D. Africa
 
   Even though the formats differ, the core question is identical and storing both is redundant.
